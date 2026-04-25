@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Big Beautiful Bill — Portfolio Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+--bg:#0a0e17;--card:#111827;--accent:#f59e0b;--green:#10b981;--red:#ef4444;--blue:#3b82f6;--purple:#8b5cf6;--cyan:#06b6d4;
+--text:#e5e7eb;--dim:#9ca3af;--border:#1f2937;--white:#fff;
+}
+body{background:var(--bg);color:var(--text);font-family:'Outfit','Segoe UI',sans-serif;min-height:100vh;}
+.mono{font-family:'JetBrains Mono',monospace;}
+.wrap{max-width:920px;margin:0 auto;padding:24px 16px;}
+h1{color:var(--white);font-size:28px;font-weight:800;line-height:1.2;text-align:center;}
+h1 span{color:var(--accent);}
+.subtitle{color:var(--dim);font-size:12px;text-align:center;margin-top:8px;}
+.label{color:var(--accent);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:3px;text-align:center;margin-bottom:6px;}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;background:var(--card);border-radius:12px;padding:4px;margin:24px 0;overflow-x:auto;}
+.tab{flex:1;padding:10px 12px;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:500;color:var(--dim);background:transparent;white-space:nowrap;transition:.2s;}
+.tab.active{background:var(--accent);color:var(--bg);font-weight:700;}
+
+/* Cards */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px;}
+.stat-icon{font-size:24px;margin-bottom:8px;}
+.stat-label{color:var(--dim);font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.stat-val{font-size:26px;font-weight:700;}
+
+/* Progress bars */
+.pbar{width:100%;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.pbar-fill{height:100%;border-radius:3px;transition:width .8s ease;}
+.pbar-8{height:8px;border-radius:4px;}
+.pbar-8 .pbar-fill{border-radius:4px;}
+
+/* Account badge */
+.badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.5px;display:inline-block;}
+.badge-brokerage{background:rgba(239,68,68,.15);color:#ef4444;}
+.badge-roth{background:rgba(16,185,129,.15);color:#10b981;}
+.badge-ira{background:rgba(59,130,246,.15);color:#3b82f6;}
+
+/* Detail cards */
+.detail{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;}
+.detail-header{padding:20px;cursor:pointer;border-left:4px solid var(--blue);}
+.detail-body{padding:0 20px 20px;border-left:4px solid var(--blue);display:none;}
+.detail.open .detail-body{display:block;}
+.detail-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.ticker{font-size:22px;font-weight:800;}
+.price{color:var(--white);font-size:20px;font-weight:700;text-align:right;}
+.meta{display:flex;gap:16px;flex-wrap:wrap;align-items:center;font-size:12px;}
+.meta span{color:var(--dim);}
+.meta strong{color:var(--white);}
+.arrow{color:var(--dim);font-size:18px;margin-left:auto;transition:transform .2s;}
+.detail.open .arrow{transform:rotate(180deg);}
+.section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+.explain-box{font-size:13px;line-height:1.8;padding:14px;border-radius:8px;margin-bottom:16px;}
+.cite-box{font-size:12px;line-height:1.8;padding:14px;border-radius:8px;border-left:3px solid var(--purple);margin-bottom:16px;}
+.stat-pills{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;}
+.pill{padding:12px;border-radius:8px;}
+.pill-label{color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.pill-val{font-size:16px;font-weight:700;}
+
+/* Risk dots */
+.dots{display:flex;gap:3px;}
+.dot{width:8px;height:8px;border-radius:50%;}
+
+/* Split bar */
+.split-bar{display:flex;height:32px;border-radius:8px;overflow:hidden;margin-bottom:16px;}
+.split-bar div{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--white);}
+
+/* Bill bar */
+.bill-row{margin-bottom:12px;}
+.bill-row-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+
+/* Account tab */
+.acc-holdings{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.acc-chip{padding:8px 14px;border-radius:8px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);}
+.acc-rules{display:flex;gap:8px;flex-wrap:wrap;}
+.rule{background:rgba(255,255,255,.03);padding:6px 12px;border-radius:6px;font-size:11px;color:var(--dim);}
+
+/* Glossary */
+.gloss{display:flex;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:8px;}
+.gloss-term{color:var(--accent);font-weight:700;min-width:120px;font-size:13px;}
+.gloss-def{font-size:13px;line-height:1.6;}
+
+/* Quiz */
+.quiz-opt{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:12px 16px;cursor:pointer;font-size:13px;margin-bottom:8px;transition:.2s;}
+.quiz-opt:hover{border-color:var(--purple);}
+.quiz-opt.correct{background:rgba(16,185,129,.15);border-color:var(--green);}
+.quiz-opt.wrong{background:rgba(239,68,68,.15);border-color:var(--red);}
+.quiz-opt.disabled{pointer-events:none;}
+.btn{padding:10px 24px;background:var(--purple);color:var(--white);border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;font-family:inherit;margin-top:16px;}
+
+/* Guide */
+.guide-hero{background:linear-gradient(135deg,rgba(245,158,11,.1),rgba(139,92,246,.1));border:1px solid rgba(245,158,11,.2);border-radius:12px;padding:24px;margin-bottom:24px;}
+
+.note-box{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:12px;padding:20px;}
+.note-title{font-size:13px;color:var(--accent);font-weight:700;margin-bottom:8px;}
+.note-text{font-size:12px;color:var(--dim);line-height:1.7;}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
+@media(max-width:640px){.two-col{grid-template-columns:1fr;}}
+
+.hidden{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="label">Investment Strategy</div>
+  <h1>Big Beautiful Bill<br><span>Portfolio Dashboard</span></h1>
+  <div class="subtitle">Public Law 119-21 · Signed July 4, 2025 · $15,000 Portfolio</div>
+
+  <div class="tabs" id="tabs">
+    <button class="tab active" onclick="showTab(0)">Dashboard</button>
+    <button class="tab" onclick="showTab(1)">ETFs</button>
+    <button class="tab" onclick="showTab(2)">Stocks</button>
+    <button class="tab" onclick="showTab(3)">Account Plan</button>
+    <button class="tab" onclick="showTab(4)">Learn</button>
+    <button class="tab" onclick="showTab(5)">Guide</button>
+  </div>
+
+  <div id="tab-content"></div>
+</div>
+
+<script>
+const D = {
+  etfs: [
+    {ticker:"ITA",name:"iShares US Aerospace & Defense ETF",price:211,sector:"Defense / Aerospace",risk:"Medium",riskNum:2,account:"Roth IRA",shares:7,cost:1477,sell:"Hold 5+ years",color:"var(--blue)",ytd:"5.3%",er:"0.38%",hold:"GE Aerospace, RTX, Boeing, Lockheed",why:"The Big Beautiful Bill appropriates over $150 BILLION in new defense spending across Title II alone. This includes $30B+ for shipbuilding (Sec. 20002), $25B+ for missile defense (Sec. 20003), $15B+ for munitions (Sec. 20004), $8B+ for air superiority (Sec. 20007), and $11B+ for nuclear forces (Sec. 20008). ITA holds all the major companies that will receive these contracts.",cite:"Title II — Committee on Armed Services, Sections 20001-20013: Over $150B in defense appropriations for shipbuilding, missile defense, munitions, air superiority, nuclear forces, and Indo-Pacific capabilities.",what:"Think of ITA like a basket of ALL the major defense companies — Lockheed, Boeing, RTX, General Dynamics, Northrop Grumman — all in one purchase. Instead of picking one winner, you own them all. When the government writes checks to defense contractors, ITA benefits."},
+    {ticker:"XLE",name:"Energy Select Sector SPDR",price:62,sector:"Energy / Oil & Gas",risk:"Medium-High",riskNum:3,account:"Brokerage",shares:24,cost:1488,sell:"May 2027",color:"var(--green)",ytd:"28.7%",er:"0.09%",hold:"ExxonMobil, Chevron, ConocoPhillips, EOG",why:"The bill massively expands oil and gas leasing on federal lands and offshore (Sections 50101-50105). It opens Alaska's petroleum reserve, expands coal leasing (Secs. 50201-50204), creates a $1B \"Energy Dominance Financing\" program (Sec. 50403), and rescinds clean energy funding (Title VI). This is a full-throttle fossil fuel expansion policy.",cite:"Title V, Subtitle A — Oil and Gas Leasing (Secs. 50101-50105): Mandates onshore/offshore leasing, opens Alaska petroleum reserves. Sec. 50403: $1B for Energy Dominance Financing. Title VI: Rescinds billions in clean energy funding.",what:"XLE is a basket of the biggest energy companies in America — ExxonMobil, Chevron, ConocoPhillips. When the government says 'drill more,' these companies benefit directly. It's like owning a slice of every major oil well and refinery in the US."},
+    {ticker:"UFO",name:"Procure Space ETF",price:48,sector:"Space / Aerospace",risk:"High",riskNum:4,account:"Roth IRA",shares:21,cost:1008,sell:"Hold 5+ years",color:"var(--purple)",ytd:"160%+",er:"0.75%",hold:"Rocket Lab, Virgin Galactic, Iridium, L3Harris",why:"Section 40005 appropriates $10 BILLION for Mars missions, Artemis missions, and the Moon-to-Mars program. This includes $700M for a Mars telecom orbiter, $2.6B for the Gateway program, $4.1B for Space Launch System, and $1.25B for ISS operations. Section 40004 creates space launch licensing fees, signaling long-term commercial space growth.",cite:"Sec. 40005: $9.995B for Mars missions, Artemis missions, and Moon-to-Mars program. Sec. 40004: Space launch and reentry licensing user fees framework through 2034. Sec. 70309: Spaceports treated like airports for bond financing.",what:"UFO is the only pure-play space ETF available. It holds companies building rockets, satellites, and space infrastructure. When NASA gets $10B for Artemis and Mars missions, these companies do the actual building. It's your ticket to the space economy."},
+    {ticker:"XOP",name:"SPDR S&P Oil & Gas Exploration",price:164,sector:"Energy / E&P",risk:"High",riskNum:4,account:"Brokerage",shares:6,cost:984,sell:"May 2027",color:"var(--cyan)",ytd:"32.5%",er:"0.35%",hold:"Devon Energy, Diamondback, Marathon Oil, Pioneer",why:"While XLE covers the big integrated oil companies, XOP focuses on the smaller exploration and production (E&P) companies that will directly benefit from new federal land leasing. The bill mandates quarterly onshore lease sales and expanded offshore leasing (Secs. 50101-50102), which directly feeds E&P companies with new drilling opportunities.",cite:"Sec. 50101: Mandates quarterly onshore oil and gas lease sales. Sec. 50102: Expanded offshore leasing program. Sec. 50104-50105: Alaska oil/gas leasing and National Petroleum Reserve access. Sec. 50401: Strategic Petroleum Reserve refill.",what:"XOP holds the companies that actually go out and FIND new oil and gas. When the government opens up millions of acres of federal land for drilling (which this bill does), these are the companies that stake claims and start producing. Higher risk than XLE but higher reward potential."},
+    {ticker:"CIBR",name:"First Trust NASDAQ Cybersecurity",price:62,sector:"Cybersecurity / Tech",risk:"Medium-High",riskNum:3,account:"IRA",shares:16,cost:992,sell:"Hold 3-5 years",color:"var(--accent)",ytd:"12.1%",er:"0.60%",hold:"CrowdStrike, Palo Alto, Fortinet, Zscaler",why:"The bill appropriates heavily for cybersecurity across defense (Sec. 20006: $20M DARPA cybersecurity + $200M AI for DoD audits), border security (Sec. 90004: AI and technology screening at borders), and military modernization ($1.685B for cryptographic modernization, $250M for Cyber Command AI, $1B for offensive cyber operations).",cite:"Sec. 20005(a)(9): $500M for 5G/6G military tech. Sec. 20005(a)(25): $250M for Cyber Command AI. Sec. 20005(a)(29): $1.685B for military cryptographic modernization. Sec. 20009(20): $1B for offensive cyber operations. Sec. 20006: DoD cybersecurity programs.",what:"CIBR holds the companies that protect computer systems from hackers. When the government spends billions on cybersecurity and cryptographic modernization (which this bill does), companies like CrowdStrike, Palo Alto Networks, and Fortinet get those contracts. Think of it as owning the digital armor protecting America."},
+    {ticker:"FENY",name:"Fidelity MSCI Energy Index ETF",price:28,sector:"Energy / Broad",risk:"Medium",riskNum:2,account:"IRA",shares:37,cost:1036,sell:"Hold 3-5 years",color:"var(--red)",ytd:"25.3%",er:"0.084%",hold:"ExxonMobil, Chevron, ConocoPhillips, Schlumberger",why:"FENY provides broad energy exposure at an extremely low cost (0.08% expense ratio — cheapest on this list). The bill's energy dominance agenda benefits the entire sector. The $1B Energy Dominance Financing program (Sec. 50403) supports everything from leasing to refining to transportation of energy and critical minerals.",cite:"Sec. 50403: $1B Energy Dominance Financing for identification, leasing, development, production, processing, transportation, transmission, refining, and generation of energy and critical minerals. Sec. 70521: Clean fuel production credit extension.",what:"FENY is similar to XLE but from Fidelity with a much lower fee (0.08% vs 0.09%). It holds the same big energy companies. I'm putting this in your IRA for long-term, tax-advantaged energy exposure at the lowest possible cost. Think of it as your cheap, steady energy bet."}
+  ],
+  stocks: [
+    {ticker:"HII",name:"Huntington Ingalls Industries",price:418,sector:"Shipbuilding / Defense",risk:"Medium",riskNum:2,account:"Roth IRA",shares:3,cost:1254,sell:"Hold 5+ years",color:"var(--blue)",pe:"18.2x",div:"1.9%",why:"HII is America's LARGEST military shipbuilder and the ONLY company that builds aircraft carriers and amphibious assault ships. Section 20002 appropriates $30+ BILLION for shipbuilding alone, including $5.4B for destroyers, $4.6B for a Virginia-class submarine, $1.8B for Landing Ship Medium, and $2.7B for oilers. HII gets the biggest slice of this pie.",cite:"Sec. 20002: $30B+ for shipbuilding including $5.4B for DDG destroyers, $4.6B for Virginia-class submarine, $1.47B for amphibious warships, $1.8B for Landing Ship Medium, $2.1B for unmanned surface vessels, $1.3B for unmanned underwater vehicles.",what:"HII is the company that builds America's biggest warships — aircraft carriers, submarines, and destroyers. They're essentially the only game in town for certain Navy ships. When the government writes a $30B+ check for new ships, a huge portion goes directly to HII. It's like owning the only car factory in a country that just announced it needs 50 new cars."},
+    {ticker:"PLTR",name:"Palantir Technologies",price:138,sector:"AI / Defense Tech",risk:"High",riskNum:4,account:"Roth IRA",shares:7,cost:966,sell:"Hold 5+ years",color:"var(--purple)",pe:"180x",div:"0%",why:"Palantir is the US military's primary AI and data analytics platform. The bill funds $145M for AI-enabled drones (Sec. 20005(a)(22)), $250M for AI ecosystem advancement, $250M for Cyber Command AI, $124M for AI capabilities testing, $200M for DoD audit AI, and $6.2B for border security technology including AI and machine learning (Sec. 90004).",cite:"Sec. 20005(a)(21-25): $1B+ for defense AI including drone AI, AI ecosystem, Cyber Command AI. Sec. 50404: $150M for transformational AI models. Sec. 90004: $6.2B for border tech including AI/ML for threat detection. Sec. 20006: $200M AI for DoD efficiency.",what:"Palantir builds the AI software that the military and intelligence agencies use to make decisions. Think of it as the 'brain' behind military operations — analyzing data from satellites, drones, and sensors to help commanders make faster, smarter choices. When the bill funds AI for defense and border security, Palantir is often the company delivering it."},
+    {ticker:"KTOS",name:"Kratos Defense & Security",price:89,sector:"Drones / Defense Tech",risk:"High",riskNum:4,account:"Brokerage",shares:10,cost:890,sell:"May 2027",color:"var(--accent)",pe:"72x",div:"0%",why:"Kratos is the leader in low-cost, attritable (expendable) drones and missile defense targets. The bill appropriates $1.4B to expand the small UAS industrial base (Sec. 20005(a)(2)), $1B for one-way attack drone expansion (Sec. 20004(31)), $678M for Collaborative Combat Aircraft (Sec. 20007(9)), and $500M for counter-drone systems (Sec. 20004(56)).",cite:"Sec. 20005(a)(2): $1.4B for small UAS industrial base expansion. Sec. 20004(31): $1B for one-way attack UAS industrial base. Sec. 20005(a)(16): $1B for innovative technology procurement. Sec. 20007(9): $678M for Collaborative Combat Aircraft.",what:"Kratos makes affordable military drones — the kind that can be sent into dangerous areas without risking a pilot. They also build target drones for missile testing. The bill pours billions into exactly these types of 'low-cost, attritable' weapons. Think of KTOS as the company building the future of warfare — swarms of cheap, smart drones."},
+    {ticker:"LMT",name:"Lockheed Martin Corporation",price:651,sector:"Defense / Prime Contractor",risk:"Low-Medium",riskNum:1,account:"IRA",shares:1,cost:651,sell:"Hold 5+ years",color:"var(--green)",pe:"22x",div:"2.1%",why:"Lockheed Martin is the world's largest defense contractor and touches nearly every category funded by the bill. They build the F-35 fighter, missile defense systems ($5.6B in Sec. 20003 for space-based intercept), the Sentinel ICBM ($2.5B in Sec. 20008), and support Artemis through Orion spacecraft ($20M in Sec. 40005). LMT has a $194B backlog.",cite:"Sec. 20003(a)(5): $5.6B for space-based intercept capabilities (Lockheed). Sec. 20008(a)(1): $2.5B for Sentinel ICBM (Lockheed prime). Sec. 20003(a)(6-7): $9.75B for military satellites and missile defense. Sec. 40005: Artemis/Orion spacecraft.",what:"Lockheed Martin is THE biggest defense company on Earth with a $194 billion backlog of orders. They make the F-35 fighter jet, missile defense systems, military satellites, and the Orion spacecraft going to the Moon. When the US government increases defense spending by $150B+, Lockheed gets the single largest share. It's the blue-chip anchor of any defense portfolio."}
+  ]
+};
+
+function badge(acc){
+  if(acc==="Brokerage") return `<span class="badge badge-brokerage">📈 Brokerage</span>`;
+  if(acc==="Roth IRA") return `<span class="badge badge-roth">🌱 Roth IRA</span>`;
+  return `<span class="badge badge-ira">🏦 IRA</span>`;
+}
+function dots(n){
+  let h='<span class="dots">';
+  for(let i=1;i<=5;i++){
+    let c=n<=2?'var(--green)':n<=3?'var(--accent)':'var(--red)';
+    h+=`<span class="dot" style="background:${i<=n?c:'var(--border)'}"></span>`;
+  }
+  return h+'</span>';
+}
+function pbar(val,max,color,h){
+  let cls=h>6?'pbar pbar-8':'pbar';
+  return `<div class="${cls}"><div class="pbar-fill" style="width:${(val/max)*100}%;background:${color};"></div></div>`;
+}
+
+function renderDashboard(){
+  const all=[...D.etfs,...D.stocks];
+  const invested=all.reduce((s,i)=>s+i.cost,0);
+  const cash=15000-invested;
+  const accs={};all.forEach(i=>{accs[i.account]=(accs[i.account]||0)+i.cost;});
+  const billSectors=[
+    {name:"Defense & Military",amt:"$150B+",icon:"🛡️",pct:45},
+    {name:"Border Security",amt:"$110B+",icon:"🏗️",pct:33},
+    {name:"Space & NASA",amt:"$10B",icon:"🚀",pct:8},
+    {name:"Coast Guard",amt:"$24.6B",icon:"⚓",pct:7},
+    {name:"Energy Dominance",amt:"$1B+",icon:"⛽",pct:5},
+    {name:"AI & Cyber",amt:"$3B+",icon:"🤖",pct:2},
+  ];
+
+  return `
+  <div class="card-grid">
+    ${[{l:"Total Budget",v:"$15,000",i:"💰",c:"var(--accent)"},{l:"Invested",v:"$${invested.toLocaleString()}",i:"📊",c:"var(--green)"},{l:"Cash Reserve",v:"$${cash.toLocaleString()}",i:"🏦",c:"var(--blue)"},{l:"Positions",v:all.length,i:"📋",c:"var(--purple)"}].map(s=>`
+    <div class="card">
+      <div class="stat-icon">${s.i}</div>
+      <div class="stat-label">${s.l}</div>
+      <div class="stat-val mono" style="color:${s.c}">${s.v}</div>
+    </div>`).join('')}
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <h3 style="color:var(--white);font-size:14px;font-weight:700;margin-bottom:16px;text-transform:uppercase;letter-spacing:1px">💼 Account Allocation</h3>
+      ${Object.entries(accs).map(([acc,total])=>{
+        let c=acc==='Brokerage'?'var(--red)':acc==='Roth IRA'?'var(--green)':'var(--blue)';
+        return `<div style="margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">${badge(acc)}<span class="mono" style="color:var(--white);font-weight:600;font-size:13px">$${total.toLocaleString()}</span></div>
+          ${pbar(total,15000,c,6)}
+        </div>`;
+      }).join('')}
+      <div style="margin-top:16px;padding:12px;background:rgba(245,158,11,.08);border-radius:8px;font-size:12px;color:var(--dim);line-height:1.6">
+        <strong style="color:var(--accent)">Why this split?</strong> Brokerage = short-term plays to sell by May 2027. Roth IRA = high-growth picks that grow tax-free forever. IRA = stable, dividend-paying positions for long-term compounding.
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--white);font-size:14px;font-weight:700;margin-bottom:16px;text-transform:uppercase;letter-spacing:1px">📊 ETF vs Stock Split</h3>
+      <div class="split-bar">
+        <div style="width:65%;background:var(--blue)">ETFs 65%</div>
+        <div style="width:35%;background:var(--purple)">Stocks 35%</div>
+      </div>
+      <div style="font-size:12px;color:var(--dim);line-height:1.6;margin-bottom:12px">
+        <strong style="color:var(--blue)">ETFs (6 positions, $6,985):</strong> Diversified baskets that spread risk across many companies. If one company in the basket drops, the others cushion the fall.
+      </div>
+      <div style="font-size:12px;color:var(--dim);line-height:1.6">
+        <strong style="color:var(--purple)">Stocks (4 positions, $3,761):</strong> Individual companies with the strongest direct connection to specific bill provisions. Higher potential reward, but higher risk.
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:24px">
+    <h3 style="color:var(--white);font-size:14px;font-weight:700;margin-bottom:16px;text-transform:uppercase;letter-spacing:1px">🏛️ Where the Big Beautiful Bill Spends Money</h3>
+    <div style="font-size:12px;color:var(--dim);margin-bottom:16px">Public Law 119-21, signed July 4, 2025. These are the major spending categories that directly drive our investment thesis.</div>
+    ${billSectors.map(s=>`<div class="bill-row">
+      <div class="bill-row-top"><span style="font-size:13px">${s.icon} ${s.name}</span><span class="mono" style="color:var(--accent);font-size:13px;font-weight:700">${s.amt}</span></div>
+      ${pbar(s.pct,50,'var(--accent)',8)}
+    </div>`).join('')}
+  </div>
+
+  <div class="note-box">
+    <div class="note-title">⚠️ Important Disclaimer</div>
+    <div class="note-text">This is an educational analysis tool, not financial advice. Past performance doesn't guarantee future results. Stock prices change daily — the prices shown are approximate as of late March 2026. Always do your own research and consider consulting a financial advisor before investing. The bill citations reference Public Law 119-21 (the "Big Beautiful Bill") signed July 4, 2025.</div>
+  </div>`;
+}
+
+function renderItems(items, type){
+  const intro = type==='ETF' ?
+    `<div style="margin-bottom:20px">
+      <div style="color:var(--accent);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Understanding ETFs</div>
+      <div class="explain-box" style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15)"><strong>An ETF (Exchange-Traded Fund) is like a shopping basket full of stocks.</strong> Instead of buying one company, you buy one share of the ETF and instantly own tiny pieces of 30-100+ companies. If one company in the basket has a bad day, the others help cushion the blow. ETFs trade on the stock market just like regular stocks — you can buy and sell them anytime the market is open. They're the safest way to invest in a theme (like defense or energy) without betting everything on one company.</div>
+    </div>` :
+    `<div style="margin-bottom:20px">
+      <div style="color:var(--purple);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Understanding Individual Stocks</div>
+      <div class="explain-box" style="background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.2)"><strong>A stock is a tiny piece of ownership in one specific company.</strong> When you buy 1 share of Lockheed Martin, you literally own a sliver of Lockheed Martin. If the company does well, your share becomes worth more. If it does poorly, your share drops. Stocks are riskier than ETFs because you're betting on ONE company instead of a basket. But the flip side is: if you pick a winner, the returns can be much bigger. These 4 stocks were selected because they have the most DIRECT connection to specific provisions in the Big Beautiful Bill.</div>
+    </div>`;
+
+  return intro + `<div style="color:var(--dim);font-size:12px;margin-bottom:16px">Click any card to expand and see the full analysis, bill citations, and plain-English explanations.</div>` +
+    items.map((it,idx)=>{
+      const id=`${type}-${idx}`;
+      const pills = type==='ETF' ?
+        `${it.hold?`<div class="pill" style="background:rgba(255,255,255,.05)"><div class="pill-label">Top Holdings</div><div style="font-size:12px">${it.hold}</div></div>`:''}
+         ${it.er?`<div class="pill" style="background:rgba(255,255,255,.05)"><div class="pill-label">Expense Ratio</div><div class="pill-val">${it.er}</div></div>`:''}
+         ${it.ytd?`<div class="pill" style="background:rgba(255,255,255,.05)"><div class="pill-label">YTD Return</div><div class="pill-val" style="color:var(--green)">${it.ytd}</div></div>`:''}` :
+        `${it.pe?`<div class="pill" style="background:rgba(255,255,255,.05)"><div class="pill-label">P/E Ratio</div><div class="pill-val">${it.pe}</div></div>`:''}
+         ${it.div?`<div class="pill" style="background:rgba(255,255,255,.05)"><div class="pill-label">Dividend Yield</div><div class="pill-val">${it.div}</div></div>`:''}`;
+      return `<div class="detail" id="${id}" style="border-left-color:${it.color}">
+        <div class="detail-header" style="border-left-color:${it.color}" onclick="toggle('${id}')">
+          <div class="detail-row">
+            <div>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+                <span class="ticker mono" style="color:${it.color}">${it.ticker}</span>${badge(it.account)}<span style="color:var(--dim);font-size:11px">${type}</span>
+              </div>
+              <div style="font-size:14px;font-weight:500">${it.name}</div>
+            </div>
+            <div class="price mono">$${it.price}<div style="color:var(--dim);font-size:11px;font-weight:400">per share</div></div>
+          </div>
+          <div class="meta">
+            <div><span>Risk </span>${dots(it.riskNum)}</div>
+            <div><span>Shares: </span><strong>${it.shares}</strong></div>
+            <div><span>Total: </span><strong style="color:var(--green)">$${it.cost.toLocaleString()}</strong></div>
+            <div><span>Sell: </span><strong style="color:var(--accent)">${it.sell}</strong></div>
+            <div><span>Sector: </span>${it.sector}</div>
+            <span class="arrow">▾</span>
+          </div>
+        </div>
+        <div class="detail-body" style="border-left-color:${it.color}">
+          <div style="border-top:1px solid var(--border);padding-top:16px">
+            <div class="section-title" style="color:var(--accent)">🎯 What is ${it.ticker}? (Plain English)</div>
+            <div class="explain-box" style="background:rgba(245,158,11,.06)">${it.what}</div>
+            <div class="section-title" style="color:var(--green)">💰 Why Buy? (The Money Thesis)</div>
+            <div style="font-size:13px;line-height:1.8;margin-bottom:16px">${it.why}</div>
+            <div class="section-title" style="color:var(--purple)">📜 Bill Citation</div>
+            <div class="cite-box mono" style="background:rgba(139,92,246,.15)">${it.cite}</div>
+            <div class="stat-pills">${pills}</div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+}
+
+function renderAccountPlan(){
+  const all=[...D.etfs,...D.stocks];
+  const accounts=[
+    {name:"Brokerage",icon:"📈",color:"var(--red)",strat:"SHORT-TERM (Sell by May 2027)",
+     exp:"Your brokerage account has NO tax advantages, but also NO restrictions on when you can pull money out. This is where we put investments you plan to sell by May 2027. We picked energy plays (XLE, XOP) and KTOS here because energy prices are elevated due to geopolitical tensions, making these good near-term trades. You'll owe capital gains tax when you sell — if you hold over 1 year, you get the lower long-term capital gains rate (15%).",
+     rules:["Gains taxed as capital gains (15-20% if held >1 year)","No contribution limits","Can withdraw anytime","Best for: positions you plan to sell within 1-2 years"]},
+    {name:"Roth IRA",icon:"🌱",color:"var(--green)",strat:"LONG-TERM GROWTH (Tax-free forever)",
+     exp:"Your Roth IRA is the most powerful investment account you have. Money grows TAX-FREE and withdrawals in retirement are TAX-FREE. That's why we put the highest-growth picks here (ITA, UFO, HII, PLTR) — every dollar of growth will never be taxed. At 35, you have 25+ years of tax-free compounding ahead of you. The $150B+ defense spending wave will play out over 4-5 years, and these positions will compound those gains tax-free.",
+     rules:["All growth is TAX-FREE forever","2026 contribution limit: $7,000/year","Can withdraw contributions anytime (not gains until 59½)","Best for: highest-growth positions"]},
+    {name:"IRA",icon:"🏦",color:"var(--blue)",strat:"LONG-TERM STEADY (Tax-deferred growth)",
+     exp:"Your Traditional IRA gives you a tax deduction NOW and taxes you when you withdraw in retirement. We put steadier, dividend-paying positions here (CIBR, FENY, LMT) because dividends reinvested in an IRA aren't taxed annually — they compound without a tax drag. Lockheed's $13.60/year dividend per share grows untaxed here. Think of this as your 'slow and steady wins the race' account.",
+     rules:["Contributions may be tax-deductible","Growth is tax-deferred","Taxed as ordinary income on withdrawal","Best for: dividend stocks and steady compounders"]}
+  ];
+
+  return `
+  <div style="margin-bottom:20px;background:rgba(245,158,11,.06);padding:16px;border-radius:8px;border:1px solid rgba(245,158,11,.15)">
+    <div style="color:var(--accent);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🧠 Why Account Type Matters</div>
+    <div style="font-size:13px;line-height:1.8">Where you PUT an investment matters just as much as WHAT you invest in. The same stock can make you thousands more (or less) depending on which account it sits in. We matched each pick to the account where it creates the most value based on your goals, tax situation, and timeline.</div>
+  </div>
+  ${accounts.map(acc=>{
+    const items=all.filter(i=>i.account===acc.name);
+    const total=items.reduce((s,i)=>s+i.cost,0);
+    return `<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div><span style="font-size:24px">${acc.icon}</span><span style="color:var(--white);font-size:18px;font-weight:700;margin-left:8px">${acc.name}</span></div>
+        <span style="color:${acc.color};font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px">${acc.strat}</span>
+      </div>
+      <div style="font-size:13px;line-height:1.8;margin-bottom:16px">${acc.exp}</div>
+      <div class="acc-holdings">${items.map(i=>`<div class="acc-chip"><span class="mono" style="color:${i.color};font-weight:700;font-size:13px">${i.ticker}</span><span style="color:var(--dim);font-size:11px">${i.shares} shares</span><span style="color:var(--green);font-weight:600;font-size:12px">$${i.cost.toLocaleString()}</span></div>`).join('')}</div>
+      <div class="acc-rules">${acc.rules.map(r=>`<div class="rule">✓ ${r}</div>`).join('')}</div>
+      <div style="margin-top:12px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--dim)">Account Total</span><span class="mono" style="color:${acc.color};font-weight:700">$${total.toLocaleString()}</span></div>
+        ${pbar(total,15000,acc.color,8)}
+      </div>
+    </div>`;
+  }).join('')}`;
+}
+
+function renderLearn(){
+  const glossary=[
+    {t:"ETF",d:"A basket of stocks you can buy as a single investment. Like a variety pack instead of a single candy bar."},
+    {t:"Expense Ratio",d:"The annual fee the ETF charges. 0.38% means you pay $3.80/year per $1,000 invested. Lower is better."},
+    {t:"P/E Ratio",d:"Price-to-Earnings. Shows how much you pay for $1 of profit. Lower = cheaper, but growth stocks often have high P/E."},
+    {t:"Dividend Yield",d:"Cash the company pays you just for owning the stock. 2% means you get $2/year for every $100 invested."},
+    {t:"Capital Gains Tax",d:"Tax you pay when you sell an investment for a profit. 15% if you held it over 1 year, higher if less."},
+    {t:"Backlog",d:"Orders a company has received but hasn't delivered yet. A $194B backlog (like LMT) means years of guaranteed revenue."},
+    {t:"Appropriation",d:"When Congress officially allocates money for a specific purpose. The bill 'appropriates' billions to defense, energy, etc."},
+    {t:"Attritable",d:"Military term for weapons designed to be expendable/disposable. Cheap drones you can afford to lose in battle."},
+  ];
+  const quizzes=[
+    {q:"What does ETF stand for?",opts:["Extra Trading Fund","Exchange-Traded Fund","Electronic Trade Format","Equity Trust Fund"],c:1},
+    {q:"Why did we put high-growth stocks in the Roth IRA?",opts:["Because it's required by law","Because gains grow tax-free forever","Because Roth has lower fees","Because it's faster to trade"],c:1},
+    {q:"Section 20002 of the bill spends $30B+ on what?",opts:["Border wall construction","NASA missions to Mars","Navy shipbuilding programs","Cybersecurity infrastructure"],c:2},
+    {q:"What's the main advantage of an ETF over a single stock?",opts:["ETFs are always cheaper","ETFs spread risk across many companies","ETFs never lose value","ETFs pay higher dividends"],c:1},
+    {q:"Why is XLE in the Brokerage account instead of IRA?",opts:["XLE doesn't fit in an IRA","Energy is a short-term play to sell by May 2027","The IRA was full","XLE has no tax benefits"],c:1},
+    {q:"How much does the bill appropriate for border wall infrastructure?",opts:["$10 billion","$25 billion","$46.5 billion","$100 billion"],c:2},
+  ];
+
+  return `
+  <div style="margin-bottom:24px">
+    <h3 style="color:var(--accent);font-size:16px;font-weight:700;margin-bottom:8px">📚 Key Concepts Glossary</h3>
+    ${glossary.map(g=>`<div class="gloss"><span class="gloss-term mono">${g.t}</span><span class="gloss-def">${g.d}</span></div>`).join('')}
+  </div>
+  <div class="card" style="padding:24px">
+    <h3 style="color:var(--purple);font-size:16px;font-weight:700;margin-bottom:4px">🧪 Test Your Knowledge</h3>
+    <div style="color:var(--dim);font-size:12px;margin-bottom:16px" id="quiz-counter">Question 1 of ${quizzes.length}</div>
+    <div id="quiz-progress">${pbar(1,quizzes.length,'var(--purple)',4)}</div>
+    <div style="color:var(--white);font-size:15px;font-weight:600;margin:20px 0 16px" id="quiz-q"></div>
+    <div id="quiz-opts"></div>
+    <div id="quiz-btn-wrap"></div>
+  </div>`;
+}
+
+let quizIdx=0,quizAnswer=null;
+const quizzes=[
+  {q:"What does ETF stand for?",opts:["Extra Trading Fund","Exchange-Traded Fund","Electronic Trade Format","Equity Trust Fund"],c:1},
+  {q:"Why did we put high-growth stocks in the Roth IRA?",opts:["Because it's required by law","Because gains grow tax-free forever","Because Roth has lower fees","Because it's faster to trade"],c:1},
+  {q:"Section 20002 of the bill spends $30B+ on what?",opts:["Border wall construction","NASA missions to Mars","Navy shipbuilding programs","Cybersecurity infrastructure"],c:2},
+  {q:"What's the main advantage of an ETF over a single stock?",opts:["ETFs are always cheaper","ETFs spread risk across many companies","ETFs never lose value","ETFs pay higher dividends"],c:1},
+  {q:"Why is XLE in the Brokerage account instead of IRA?",opts:["XLE doesn't fit in an IRA","Energy is a short-term play to sell by May 2027","The IRA was full","XLE has no tax benefits"],c:1},
+  {q:"How much does the bill appropriate for border wall infrastructure?",opts:["$10 billion","$25 billion","$46.5 billion","$100 billion"],c:2},
+];
+
+function loadQuiz(){
+  const qz=quizzes[quizIdx];
+  document.getElementById('quiz-counter').textContent=`Question ${quizIdx+1} of ${quizzes.length}`;
+  document.getElementById('quiz-progress').innerHTML=pbar(quizIdx+1,quizzes.length,'var(--purple)',4);
+  document.getElementById('quiz-q').textContent=qz.q;
+  document.getElementById('quiz-opts').innerHTML=qz.opts.map((o,i)=>`<div class="quiz-opt" id="qo-${i}" onclick="pickAnswer(${i})">${String.fromCharCode(65+i)}. ${o}</div>`).join('');
+  document.getElementById('quiz-btn-wrap').innerHTML='';
+  quizAnswer=null;
+}
+function pickAnswer(i){
+  if(quizAnswer!==null)return;
+  quizAnswer=i;
+  const qz=quizzes[quizIdx];
+  for(let j=0;j<qz.opts.length;j++){
+    const el=document.getElementById('qo-'+j);
+    el.classList.add('disabled');
+    if(j===qz.c)el.classList.add('correct'),el.innerHTML+=' ✅';
+    if(j===i&&i!==qz.c)el.classList.add('wrong'),el.innerHTML+=' ❌';
+  }
+  document.getElementById('quiz-btn-wrap').innerHTML=`<button class="btn" onclick="nextQuiz()">${quizIdx<quizzes.length-1?'Next Question →':'Start Over 🔄'}</button>`;
+}
+function nextQuiz(){quizIdx=(quizIdx+1)%quizzes.length;loadQuiz();}
+
+function renderGuide(){
+  const sections=[
+    {t:"🎯 Dashboard Tab",c:"Your command center. See your total budget ($15,000), how it's allocated across accounts, the ETF/stock split, and a visual breakdown of where the bill spends money. The spending bars show you the relative scale of each sector's funding — defense dwarfs everything else, which is why defense-related investments dominate the portfolio."},
+    {t:"📊 ETFs Tab",c:"Click any ETF card to expand it. Each card has three key sections: (1) 'What is it?' explains the ETF in plain language, (2) 'Why Buy?' explains the investment case tied to the bill, and (3) 'Bill Citation' gives you the exact sections and dollar amounts from Public Law 119-21. The colored stats at the bottom show expense ratios, returns, and holdings at a glance."},
+    {t:"📈 Stocks Tab",c:"Same expandable format as ETFs but for individual companies. These 4 stocks were chosen because they have the MOST DIRECT connection to specific bill provisions. HII is the only company that builds certain Navy ships. PLTR is the military's go-to AI platform. Each card explains this connection in plain English and cites the exact sections."},
+    {t:"💼 Account Plan Tab",c:"This is crucial — it explains WHY each investment goes in a specific account type. The strategy: high-growth picks go in Roth IRA (tax-free growth), short-term trades go in Brokerage (sell by May 2027), and steady dividend payers go in Traditional IRA (tax-deferred compounding). Each account section shows its holdings, rules, and total allocation."},
+    {t:"📚 Learn Tab",c:"A glossary of every financial term used in this dashboard, plus an interactive quiz to test your understanding. The quiz covers both investment concepts and bill-specific knowledge. Great for reinforcing what you've learned — try to get all 6 questions right!"},
+    {t:"🔄 How to Actually Buy",c:"1. Log into your brokerage platform (Fidelity, Schwab, Vanguard, etc.). 2. Navigate to the correct account (Brokerage, Roth IRA, or IRA). 3. Search for the ticker symbol (e.g., 'ITA'). 4. Select 'Buy' and enter the number of shares from this dashboard. 5. Use a 'Limit Order' set slightly above the current price to control your purchase price. 6. Review and confirm. Repeat for each position in the correct account."},
+    {t:"⏰ When to Sell",c:"Brokerage positions (XLE, XOP, KTOS): Target May 2027. Set price alerts on your brokerage at +30% and +50% from your purchase price. If energy/defense momentum fades before May 2027, consider selling earlier. Roth IRA and IRA positions: These are long-term holds. The defense spending authorized by this bill runs through September 30, 2029. Space and AI spending runs even longer. Let these compound for 5+ years minimum."},
+    {t:"⚠️ Risk Management",c:"The ~$1,254 cash reserve is intentional — it gives you flexibility to buy more if prices dip, or to cover any emergencies. Never invest money you might need in the next 6 months. If any single position drops 25%+, don't panic sell — review whether the bill's funding provisions have changed. If the funding is still there, the thesis is still intact."},
+  ];
+  return `
+  <div class="guide-hero">
+    <h3 style="color:var(--white);font-size:18px;font-weight:700;margin-bottom:12px">📖 How to Use This Dashboard</h3>
+    <div style="font-size:13px;line-height:1.8">This tool was built to help you make informed investment decisions based on specific government spending provisions in the Big Beautiful Bill (Public Law 119-21). Here's how to get the most out of it.</div>
+  </div>
+  ${sections.map(s=>`<div class="card"><h4 style="color:var(--white);font-size:14px;font-weight:700;margin-bottom:10px">${s.t}</h4><div style="font-size:13px;line-height:1.8">${s.c}</div></div>`).join('')}`;
+}
+
+function toggle(id){document.getElementById(id).classList.toggle('open');}
+
+function showTab(idx){
+  document.querySelectorAll('.tab').forEach((t,i)=>{t.classList.toggle('active',i===idx);});
+  const el=document.getElementById('tab-content');
+  if(idx===0) el.innerHTML=renderDashboard();
+  else if(idx===1) el.innerHTML=renderItems(D.etfs,'ETF');
+  else if(idx===2) el.innerHTML=renderItems(D.stocks,'STOCK');
+  else if(idx===3) el.innerHTML=renderAccountPlan();
+  else if(idx===4){el.innerHTML=renderLearn();loadQuiz();}
+  else if(idx===5) el.innerHTML=renderGuide();
+}
+showTab(0);
+</script>
+</body>
+</html>
